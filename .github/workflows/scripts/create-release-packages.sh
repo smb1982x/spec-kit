@@ -75,6 +75,9 @@ generate_commands() {
         in_body { print }
       ' | sed 's/^/      /' | sed 's/^      $//')
 
+      # Apply path rewriting to ensure .specify/ prefix consistency
+      yaml_body=$(echo "$yaml_body" | rewrite_paths)
+
       # Construct YAML entry using printf for compatibility
       capitalized_name=$(echo "${name:0:1}" | tr '[:lower:]' '[:upper:]')${name:1}
       body=$(printf "  - slug: %s\n    name: %s\n    description: %s\n    roleDefinition: %s\n    groups: [read, edit, command]\n    customInstructions: >-\n%s" \
