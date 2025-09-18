@@ -840,6 +840,10 @@ def init(
             if not check_tool("opencode", "Install from: https://opencode.ai"):
                 console.print("[red]Error:[/red] opencode CLI is required for opencode projects")
                 agent_tool_missing = True
+        elif selected_ai == "kilocode":
+            if not check_tool("kilocode", "Install from: https://kilocode.ai"):
+                console.print("[red]Error:[/red] Kilo Code CLI is required for Kilo Code projects")
+                agent_tool_missing = True
         # GitHub Copilot and Cursor checks are not needed as they're typically available in supported IDEs
 
         if agent_tool_missing:
