@@ -129,6 +129,7 @@ If you need to bypass TLS validation while experimenting:
 ```bash
 specify check --skip-tls
 specify init demo --skip-tls --ai gemini --ignore-agent-tools --script ps
+specify init demo --skip-tls --ai kilocode --ignore-agent-tools --script ps
 ```
 (Use only for local experimentation.)
 
