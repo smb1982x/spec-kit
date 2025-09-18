@@ -6,11 +6,7 @@ set -euo pipefail
 # Usage: .github/workflows/scripts/create-release-packages.sh <version>
 #   Version argument should include leading 'v'.
 #   Optionally set AGENTS and/or SCRIPTS env vars to limit what gets built.
-<<<<<<< HEAD
-#     AGENTS  : space or comma separated subset of: claude gemini copilot cursor kilocode opencode (default: all)
-=======
-#     AGENTS  : space or comma separated subset of: claude gemini copilot cursor kilocode opencode (default: all)
->>>>>>> 5c6e32d (feat: Add Kilo Code support to release script)
+#     AGENTS  : space or comma separated subset of: claude gemini copilot cursor qwen kilocode opencode (default: all)
 #     SCRIPTS : space or comma separated subset of: sh ps (default: both)
 #   Examples:
 #     AGENTS=claude SCRIPTS=sh $0 v0.2.0
@@ -242,9 +238,4 @@ for agent in "${AGENT_LIST[@]}"; do
 done
 
 echo "Archives:"
-<<<<<<< HEAD
-ls -1 spec-kit-template-*-${NEW_VERSION}.zip
-=======
-ls -1 spec-kit-template-*-${NEW_VERSION}.zip
-
->>>>>>> 5c6e32d (feat: Add Kilo Code support to release script)
+ls -1 spec-kit-template-*-"${NEW_VERSION}".zip
