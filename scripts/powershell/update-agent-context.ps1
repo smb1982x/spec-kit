@@ -13,6 +13,7 @@ $claudeFile = Join-Path $repoRoot 'CLAUDE.md'
 $geminiFile = Join-Path $repoRoot 'GEMINI.md'
 $copilotFile = Join-Path $repoRoot '.github/copilot-instructions.md'
 $cursorFile = Join-Path $repoRoot '.cursor/rules/specify-rules.mdc'
+$qwenFile = Join-Path $repoRoot 'QWEN.md'
 $kilocodeFile = Join-Path $repoRoot '.kilocode/rules/specify-rules.md'
 $agentsFile = Join-Path $repoRoot 'AGENTS.md'
 
@@ -73,6 +74,7 @@ switch ($AgentType) {
     'gemini' { Update-AgentFile $geminiFile 'Gemini CLI' }
     'copilot' { Update-AgentFile $copilotFile 'GitHub Copilot' }
     'cursor' { Update-AgentFile $cursorFile 'Cursor IDE' }
+    'qwen' { Update-AgentFile $qwenFile 'Qwen Code' }
     'kilocode' { Update-AgentFile $kilocodeFile 'Kilo Code' }
     'opencode' { Update-AgentFile $agentsFile 'opencode' }
     '' {
@@ -81,17 +83,18 @@ switch ($AgentType) {
             @{file=$geminiFile; name='Gemini CLI'},
             @{file=$copilotFile; name='GitHub Copilot'},
             @{file=$cursorFile; name='Cursor IDE'},
+            @{file=$qwenFile; name='Qwen Code'},
             @{file=$kilocodeFile; name='Kilo Code'},
             @{file=$agentsFile; name='opencode'}
         )) {
             if (Test-Path $pair.file) { Update-AgentFile $pair.file $pair.name }
         }
-        if (-not (Test-Path $claudeFile) -and -not (Test-Path $geminiFile) -and -not (Test-Path $copilotFile) -and -not (Test-Path $cursorFile) -and -not (Test-Path $kilocodeFile) -and -not (Test-Path $agentsFile)) {
+        if (-not (Test-Path $claudeFile) -and -not (Test-Path $geminiFile) -and -not (Test-Path $copilotFile) -and -not (Test-Path $cursorFile) -and -not (Test-Path $qwenFile) -and -not (Test-Path $kilocodeFile) -and -not (Test-Path $agentsFile)) {
             Write-Output 'No agent context files found. Creating Claude Code context file by default.'
             Update-AgentFile $claudeFile 'Claude Code'
         }
     }
-    Default { Write-Error "ERROR: Unknown agent type '$AgentType'. Use: claude, gemini, copilot, cursor, kilocode, opencode or leave empty for all."; exit 1 }
+    Default { Write-Error "ERROR: Unknown agent type '$AgentType'. Use: claude, gemini, copilot, cursor, qwen, kilocode, opencode or leave empty for all."; exit 1 }
 }
 
 Write-Output ''
@@ -101,4 +104,4 @@ if ($newFramework) { Write-Output "- Added framework: $newFramework" }
 if ($newDb -and $newDb -ne 'N/A') { Write-Output "- Added database: $newDb" }
 
 Write-Output ''
-Write-Output 'Usage: ./update-agent-context.ps1 [claude|gemini|copilot|cursor|kilocode|opencode]'
+Write-Output 'Usage: ./update-agent-context.ps1 [claude|gemini|copilot|cursor|qwen|kilocode|opencode]'
