@@ -6,7 +6,11 @@ set -euo pipefail
 # Usage: .github/workflows/scripts/create-release-packages.sh <version>
 #   Version argument should include leading 'v'.
 #   Optionally set AGENTS and/or SCRIPTS env vars to limit what gets built.
-#     AGENTS  : space or comma separated subset of: claude gemini copilot qwen opencode (default: all)
+<<<<<<< HEAD
+#     AGENTS  : space or comma separated subset of: claude gemini copilot cursor kilocode opencode (default: all)
+=======
+#     AGENTS  : space or comma separated subset of: claude gemini copilot cursor kilocode opencode (default: all)
+>>>>>>> 5c6e32d (feat: Add Kilo Code support to release script)
 #     SCRIPTS : space or comma separated subset of: sh ps (default: both)
 #   Examples:
 #     AGENTS=claude SCRIPTS=sh $0 v0.2.0
@@ -37,6 +41,10 @@ rewrite_paths() {
 generate_commands() {
   local agent=$1 ext=$2 arg_format=$3 output_dir=$4 script_variant=$5
   mkdir -p "$output_dir"
+
+  # Kilo Code: Initialize single YAML file
+  [ "$agent" = "kilocode" ] && [ "$ext" = "yaml" ] && [ ! -f "$output_dir/.kilocodemodes" ] && echo "customModes:" > "$output_dir/.kilocodemodes"
+
   for template in templates/commands/*.md; do
     [[ -f "$template" ]] || continue
     local name description script_command body
@@ -54,20 +62,40 @@ generate_commands() {
       script_command="(Missing script command for $script_variant)"
     fi
     
-    # Replace {SCRIPT} placeholder with the script command
-    body=$(printf '%s\n' "$file_content" | sed "s|{SCRIPT}|${script_command}|g")
-    
-    # Remove the scripts: section from frontmatter while preserving YAML structure
-    body=$(printf '%s\n' "$body" | awk '
-      /^---$/ { print; if (++dash_count == 1) in_frontmatter=1; else in_frontmatter=0; next }
-      in_frontmatter && /^scripts:$/ { skip_scripts=1; next }
-      in_frontmatter && /^[a-zA-Z].*:/ && skip_scripts { skip_scripts=0 }
-      in_frontmatter && skip_scripts && /^[[:space:]]/ { next }
-      { print }
-    ')
-    
-    # Apply other substitutions
-    body=$(printf '%s\n' "$body" | sed "s/{ARGS}/$arg_format/g" | sed "s/__AGENT__/$agent/g" | rewrite_paths)
+    # Special handling for Kilo Code YAML format
+    if [ "$ext" = "yaml" ]; then
+      # Process body for Kilo Code format
+      processed_content=$(echo "$file_content" | sed "s|{SCRIPT}|${script_command}|g")
+      yaml_body=$(echo "$processed_content" | awk '
+        BEGIN { in_body = 0 }
+        /^---$/ {
+          if (++dash_count == 2) in_body = 1
+          next
+        }
+        in_body { print }
+      ' | sed 's/^/      /' | sed 's/^      $//')
+
+      # Construct YAML entry using printf for compatibility
+      capitalized_name=$(echo "${name:0:1}" | tr '[:lower:]' '[:upper:]')${name:1}
+      body=$(printf "  - slug: %s\n    name: %s\n    description: %s\n    roleDefinition: %s\n    groups: [read, edit, command]\n    customInstructions: >-\n%s" \
+             "$name" "$capitalized_name" "$description" "$description" "$yaml_body")
+    else
+      # Standard processing for other formats
+      # Replace {SCRIPT} placeholder with the script command
+      body=$(printf '%s\n' "$file_content" | sed "s|{SCRIPT}|${script_command}|g")
+      
+      # Remove the scripts: section from frontmatter while preserving YAML structure
+      body=$(printf '%s\n' "$body" | awk '
+        /^---$/ { print; if (++dash_count == 1) in_frontmatter=1; else in_frontmatter=0; next }
+        in_frontmatter && /^scripts:$/ { skip_scripts=1; next }
+        in_frontmatter && /^[a-zA-Z].*:/ && skip_scripts { skip_scripts=0 }
+        in_frontmatter && skip_scripts && /^[[:space:]]/ { next }
+        { print }
+      ')
+      
+      # Apply other substitutions
+      body=$(printf '%s\n' "$body" | sed "s/{ARGS}/$arg_format/g" | sed "s/__AGENT__/$agent/g" | rewrite_paths)
+    fi
     
     case $ext in
       toml)
@@ -76,6 +104,8 @@ generate_commands() {
         echo "$body" > "$output_dir/$name.$ext" ;;
       prompt.md)
         echo "$body" > "$output_dir/$name.$ext" ;;
+      yaml)
+        echo "$body" >> "$output_dir/.kilocodemodes" ;;
     esac
   done
 }
@@ -147,6 +177,8 @@ build_variant() {
     cursor)
       mkdir -p "$base_dir/.cursor/commands"
       generate_commands cursor md "\$ARGUMENTS" "$base_dir/.cursor/commands" "$script" ;;
+    kilocode)
+      generate_commands kilocode yaml "\$ARGUMENTS" "$base_dir" "$script" ;;
     qwen)
       mkdir -p "$base_dir/.qwen/commands"
       generate_commands qwen toml "{{args}}" "$base_dir/.qwen/commands" "$script"
@@ -160,7 +192,7 @@ build_variant() {
 }
 
 # Determine agent list
-ALL_AGENTS=(claude gemini copilot cursor qwen opencode)
+ALL_AGENTS=(claude gemini copilot cursor kilocode qwen opencode)
 ALL_SCRIPTS=(sh ps)
 
 
@@ -207,4 +239,9 @@ for agent in "${AGENT_LIST[@]}"; do
 done
 
 echo "Archives:"
-ls -1 spec-kit-template-*-"${NEW_VERSION}".zip
+<<<<<<< HEAD
+ls -1 spec-kit-template-*-${NEW_VERSION}.zip
+=======
+ls -1 spec-kit-template-*-${NEW_VERSION}.zip
+
+>>>>>>> 5c6e32d (feat: Add Kilo Code support to release script)
