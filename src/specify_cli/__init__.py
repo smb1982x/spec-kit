@@ -58,6 +58,7 @@ AI_CHOICES = {
     "claude": "Claude Code",
     "gemini": "Gemini CLI",
     "cursor": "Cursor",
+    "kilocode": "Kilo Code",
     "qwen": "Qwen Code",
     "opencode": "opencode"
 }
